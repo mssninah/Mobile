@@ -2,18 +2,14 @@ export const uploadImageToCloudinary = async (imageUri) => {
   const data = new FormData();
   
   // Append image
-  data.append('file', {
-    uri: imageUri,
-    type: 'image/jpeg', // Adjust based on your file type
-    name: 'profile_picture.jpg',
-  });
+  data.append('file', { uri: imageUri, name: 'profile_picture.jpg', type: 'image/jpeg' });
 
   // Cloudinary required parameters
   data.append('upload_preset', 'ml_default');
   data.append('cloud_name', 'djalkrrwa'); // Replace with your Cloudinary Cloud Name
 
   try {
-    let response = await fetch(`https://api.cloudinary.com/v1_1/your_cloud_name/image/upload`, {
+    let response = await fetch(`https://api.cloudinary.com/v1_1/djalkrrwa/image/upload`, {
       method: 'POST',
       body: data,
       headers: {
