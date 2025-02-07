@@ -3,6 +3,7 @@ import { View, Text, Image, TouchableOpacity, ActivityIndicator, StyleSheet } fr
 import { auth } from '../config/firebase-config';
 import { pickImageAndUpload, getProfilePictureUrl } from '../utils/uploadImageToCloudinary';
 import Footer from '../components/Footer';
+import Icon from 'react-native-vector-icons/FontAwesome'; // Importation de l'icône
 
 const ProfileScreen = () => {
   const [profileImage, setProfileImage] = useState(null);
@@ -31,7 +32,7 @@ const ProfileScreen = () => {
       <Text style={styles.title}>Profile</Text>
       
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#fff" />
       ) : (
         <Image 
           source={profileImage ? { uri: profileImage } : require('../../assets/default-avatar.png')} 
@@ -40,7 +41,8 @@ const ProfileScreen = () => {
       )}
 
       <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
-        <Text style={styles.uploadText}>Upload Profile Picture</Text>
+        <Icon name="pencil" size={20} color="#fff" />
+        <Text style={styles.uploadText}> Upload Profile Picture</Text>
       </TouchableOpacity>
 
       <Text style={styles.email}>{auth.currentUser?.email}</Text>
@@ -54,36 +56,63 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#2e3b4e',  // Fond de couleur cryptomonnaie
+    padding: 20,
+    borderRadius: 20,
+    shadowColor: "#000",  // Ombre du fond pour donner de la profondeur
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.5,
+    elevation: 5,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20,
+    color: '#fff',
+    marginBottom: 30,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 10,
   },
   profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 2,
-    borderColor: '#000',
-    marginBottom: 20,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    borderWidth: 4,
+    borderColor: '#00ffcc', // Couleur de bordure inspirée de la cryptomonnaie
+    marginBottom: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
   uploadButton: {
-    backgroundColor: '#007bff',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    marginTop: 10,
+    backgroundColor: '#007bff',  // Bleu cryptomonnaie
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 30,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   uploadText: {
     color: '#fff',
     fontSize: 16,
+    marginLeft: 10,
+    fontWeight: '600',
   },
   email: {
     marginTop: 20,
-    fontSize: 16,
-    color: '#333',
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: '600',
   },
 });
 

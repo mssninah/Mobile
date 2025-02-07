@@ -1,5 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
-import { auth, db } from '../config/firebase-config';
+import { auth, firestore } from '../config/firebase-config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 // Fonction pour prendre une photo et l'uploader sur Cloudinary
@@ -60,7 +60,7 @@ export const pickImageAndUpload = async () => {
     const userEmail = user.email;
     console.log("📧 Email utilisateur:", userEmail);
 
-    const userDocRef = doc(db, 'users', userEmail);
+    const userDocRef = doc(firestore, 'users', userEmail);
     console.log("📂 Référence du document Firestore:", userDocRef.path);
 
     await setDoc(userDocRef, { profileImage: imageUrl }, { merge: true });
@@ -85,7 +85,7 @@ export const getProfilePictureUrl = async () => {
     const userEmail = user.email;
     console.log("📧 Email utilisateur:", userEmail);
 
-    const userDocRef = doc(db, 'users', userEmail);
+    const userDocRef = doc(firestore, 'users', userEmail);
     console.log("📂 Référence du document Firestore:", userDocRef.path);
 
     const userDoc = await getDoc(userDocRef);
