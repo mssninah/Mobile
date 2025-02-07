@@ -1,0 +1,29 @@
+npm install -g eas-cli
+
+
+eas login
+ninahx_x
+Z6zQ}Z'k%R_)u5}
+
+
+
+eas build -p android --profile preview
+
+
+npm install @react-navigation/bottom-tabs react-native-screens react-native-safe-area-context react-native-vector-icons react-native-gesture-handler react-native-reanimated
+
+
+
+npx expo install expo-image-picker
+
+npm install axios
+
+npm install cloudinary
+
+
+npm uninstall react-native-image-picker
+
+npm install react-native-image-picker
+
+
+djalkrrwa
