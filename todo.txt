@@ -19,3 +19,11 @@ npx expo install expo-image-picker
 npm install axios
 
 npm install cloudinary
+
+
+npm uninstall react-native-image-picker
+
+npm install react-native-image-picker
+
+
+djalkrrwa
