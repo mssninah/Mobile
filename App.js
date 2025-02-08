@@ -15,7 +15,7 @@ import WalletScreen from './src/screen/WalletScreen'; // Import Wallet Screen
 import ProfileScreen from './src/screen/ProfileScreen'; // Import Profile Screen
 import ImportFile from './src/screen/ImportFile'; // Import ImportFile Screen
 import TransactionHistoryScreen from './src/screen/TransactionHistoryScreen';
-
+import CryptoGrapheScreen from './src/screen/CryptoGrapheScreen';
 
 // Create Stack Navigator
 const Stack = createStackNavigator();
@@ -90,6 +90,11 @@ export default function App() {
 
          {/* History Screen */}
          <Stack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
+
+
+         <Stack.Screen name="CryptoGraphe" component={CryptoGrapheScreen} />
+
+
       </Stack.Navigator>
     </NavigationContainer>
     </ThemeProvider>

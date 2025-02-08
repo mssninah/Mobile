@@ -1,29 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
 import Footer from '../components/Footer';
 import { useTheme } from '../../contexts/ThemeContext'; // Import du contexte de thème
+import { getCryptoRates, listenToCryptoRates } from '../services/cryptoService'; // Import des fonctions de service
+import { useNavigation } from '@react-navigation/native';
 
 const CryptoCoursesScreen = () => {
+  const navigation = useNavigation();
   const { darkMode } = useTheme(); // Accède au mode sombre ou clair
-  const cryptos = [
-    { id: '1', name: 'Bitcoin', values: [50000, 51000, 49500, 52000, 53000] },
-    { id: '2', name: 'Ethereum', values: [1500, 1550, 1520, 1580, 1600] },
-    { id: '3', name: 'Binance Coin', values: [300, 310, 290, 320, 330] },
-  ];
+  const [cryptos, setCryptos] = useState([]); // État pour stocker les données des cryptos
+  const [selectedCrypto, setSelectedCrypto] = useState(null); // Crypto sélectionnée
 
-  const [selectedCrypto, setSelectedCrypto] = useState('all');
+  // Récupère les données au montage du composant
+  useEffect(() => {
+    const fetchCryptoRates = async () => {
+      const data = await getCryptoRates();
+      setCryptos(data); // Mettre à jour les cryptos récupérées
+    };
 
-  const allValues = cryptos.reduce((acc, crypto) => {
-    crypto.values.forEach((val, index) => {
-      acc[index] = (acc[index] || 0) + val;
-    });
-    return acc;
+    fetchCryptoRates();
+
+    // Écoute en temps réel
+    listenToCryptoRates(setCryptos);
   }, []);
-
-  const chartData = selectedCrypto === 'all'
-    ? { labels: ['1', '2', '3', '4', '5'], datasets: [{ data: allValues }] }
-    : { labels: ['1', '2', '3', '4', '5'], datasets: [{ data: cryptos.find((c) => c.name === selectedCrypto).values }] };
 
   const themeStyles = darkMode ? styles.darkTheme : styles.lightTheme; // Applique les styles du mode sombre ou clair
 
@@ -31,51 +30,37 @@ const CryptoCoursesScreen = () => {
     <View style={[styles.container, themeStyles.container]}>
       <Text style={[styles.header, themeStyles.header]}>Crypto Courses</Text>
 
-      {/* Scrollable list for selecting cryptocurrency */}
-      <ScrollView
-        style={[styles.scrollContainer, themeStyles.scrollContainer]}
-        contentContainerStyle={{ paddingBottom: 80 }}
-      >
-        <TouchableOpacity
-          style={[styles.cryptoButton, selectedCrypto === 'all' && styles.selectedButton, themeStyles.cryptoButton]}
-          onPress={() => setSelectedCrypto('all')}
-        >
-          <Text style={[styles.cryptoButtonText, themeStyles.cryptoButtonText]}>All Cryptos</Text>
-        </TouchableOpacity>
-        {cryptos.map((crypto) => (
-          <TouchableOpacity
-            key={crypto.id}
-            style={[styles.cryptoButton, selectedCrypto === crypto.name && styles.selectedButton, themeStyles.cryptoButton]}
-            onPress={() => setSelectedCrypto(crypto.name)}
+     
+
+      <TouchableOpacity
+            style={[styles.button, themeStyles.button]}
+            onPress={() => navigation.navigate('CryptoGraphe')} // Redirige vers CryptoGrapheScreen
           >
-            <Text style={[styles.cryptoButtonText, themeStyles.cryptoButtonText]}>{crypto.name}</Text>
-          </TouchableOpacity>
+            <Text style={[styles.buttonText, themeStyles.buttonText]}>Voir la courbe</Text>
+      </TouchableOpacity>
+
+      {/* Affichage des cryptos */}
+      <ScrollView style={[styles.cryptoList, themeStyles.cryptoList]}>
+        {cryptos.map((crypto, index) => (
+          <View key={`${crypto.name}-${index}`} style={styles.cryptoItem}>
+            <Text style={[styles.cryptoName, themeStyles.cryptoName]}>
+              {crypto.name}
+            </Text>
+            <Text style={[styles.cryptoDetails, themeStyles.cryptoDetails]}>
+              Valeur: {crypto.val}
+            </Text>
+            <Text style={[styles.cryptoDetails, themeStyles.cryptoDetails]}>
+              Montant: {crypto.montant}
+            </Text>
+            <Text style={[styles.cryptoDetails, themeStyles.cryptoDetails]}>
+              Dernière mise à jour: {crypto.dateCours}
+            </Text>
+          </View>
         ))}
       </ScrollView>
 
-      {/* Scrollable chart view */}
-      <ScrollView
-        style={[styles.chartContainer, themeStyles.chartContainer]}
-        contentContainerStyle={{ paddingBottom: 80 }}
-      >
-        <Text style={[styles.chartTitle, themeStyles.chartTitle]}>
-          {selectedCrypto === 'all' ? 'Combined Chart of All Cryptos' : `Value Chart: ${selectedCrypto}`}
-        </Text>
-        <LineChart
-          data={chartData}
-          width={340}
-          height={220}
-          chartConfig={{
-            backgroundColor: '#1E293B',
-            backgroundGradientFrom: '#3B82F6',
-            backgroundGradientTo: '#2563EB',
-            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          }}
-          bezier
-          style={styles.chart}
-        />
-      </ScrollView>
+
+
 
       {/* Footer */}
       <Footer />
@@ -94,46 +79,32 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: 'center',
   },
-  scrollContainer: {
+  picker: {
+    height: 50,
+    width: '100%',
     marginBottom: 16,
-    paddingHorizontal: 8,
   },
-  cryptoButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    marginVertical: 8,
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    alignItems: 'center',
-  },
-  selectedButton: {
-    backgroundColor: '#60A5FA',
-  },
-  cryptoButtonText: {
-    fontSize: 16,
-    color: '#1F2937',
-  },
-  chartContainer: {
+  cryptoList: {
     marginTop: 16,
+    padding: 8,
+  },
+  cryptoItem: {
+    marginBottom: 16,
     padding: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f1f5f9',
     borderRadius: 8,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
-  chartTitle: {
+  cryptoName: {
     fontSize: 18,
-    marginBottom: 8,
-    textAlign: 'center',
+    fontWeight: 'bold',
   },
-  chart: {
-    borderRadius: 16,
+  cryptoDetails: {
+    fontSize: 16,
+    marginTop: 4,
   },
 
   // Dark Theme Styles
@@ -144,20 +115,18 @@ const styles = StyleSheet.create({
     header: {
       color: '#fff',
     },
-    cryptoButton: {
+    picker: {
       backgroundColor: '#333',
-    },
-    cryptoButtonText: {
       color: '#fff',
     },
-    chartContainer: {
+    cryptoList: {
       backgroundColor: '#333',
     },
-    chartTitle: {
+    cryptoName: {
       color: '#fff',
     },
-    scrollContainer: {
-      backgroundColor: '#1F2937',
+    cryptoDetails: {
+      color: '#fff',
     },
   },
 
@@ -169,20 +138,18 @@ const styles = StyleSheet.create({
     header: {
       color: '#1F2937',
     },
-    cryptoButton: {
+    picker: {
       backgroundColor: '#ffffff',
-    },
-    cryptoButtonText: {
       color: '#1F2937',
     },
-    chartContainer: {
+    cryptoList: {
       backgroundColor: '#ffffff',
     },
-    chartTitle: {
+    cryptoName: {
       color: '#1F2937',
     },
-    scrollContainer: {
-      backgroundColor: '#f9fafb',
+    cryptoDetails: {
+      color: '#1F2937',
     },
   },
 });

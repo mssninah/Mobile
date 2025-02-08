@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
     fontSize: 34,
     fontWeight: 'bold',
   },
+  
   tableContainer: {
     flex: 1,
     borderRadius: 16,
