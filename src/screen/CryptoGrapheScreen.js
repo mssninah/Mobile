@@ -3,6 +3,18 @@ import { View, Text, StyleSheet, TouchableOpacity, CheckBox, ScrollView } from '
 import { useNavigation } from '@react-navigation/native'; // Import de useNavigation
 import { fetchCryptoHistory, listenToCryptoHistory } from '../services/cryptoHistoryService'; // Import des services
 
+
+// une liste de tout les crypto monnaie, 
+//avec checkbox
+//on affiche une la courbe des cryptos checker dnas le hcheckbox
+
+
+//nb montan est encore de type string
+
+// le graphe est par rapoort au montant de la cryptomonnaie 
+//une courbe des montant
+
+
 const CryptoGrapheScreen = () => {
   const navigation = useNavigation(); // Utiliser le hook pour la navigation
   const [graphData, setGraphData] = useState(null); // État pour les données du graphique

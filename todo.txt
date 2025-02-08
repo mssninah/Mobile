@@ -27,3 +27,18 @@ npm install react-native-image-picker
 
 
 djalkrrwa
+
+
+
+
+
+faire le graphe:
+    -get crypto historique dessin graphe
+
+afficher portefeuille utilisateur :
+
+afficher historique transactions
+
+demande depot et demande retrait compte:
+
+notifications apres chaque operation 

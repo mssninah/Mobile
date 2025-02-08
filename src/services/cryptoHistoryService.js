@@ -1,6 +1,10 @@
 import { db } from '../config/firebase-config'; // Assurez-vous que Firebase est bien configuré
 import { getDocs, collection, query, onSnapshot } from 'firebase/firestore';
 
+
+
+
+
 // Service to fetch historical courses
 export const fetchCryptoHistory = async () => {
   try {
