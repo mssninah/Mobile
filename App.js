@@ -65,7 +65,9 @@ export default function App() {
   return (
     <ThemeProvider>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={isLoggedIn ? "CryptoCourses" : "Login"}>
+      <Stack.Navigator initialRouteName={isLoggedIn ? "CryptoCourses" : "Login"}
+      screenOptions={{ headerShown: false}}
+      >
         {/* Login Screen */}
         <Stack.Screen 
           name="Login" 

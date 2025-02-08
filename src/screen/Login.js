@@ -1,7 +1,14 @@
-import { login, signInWithGoogle } from '../services/authService';
-import Button from '../components/Button';
+import { login } from '../services/authService';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, View, TouchableOpacity, StatusBar } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+  TouchableOpacity,
+  StatusBar,
+  ImageBackground,
+} from 'react-native';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -11,14 +18,14 @@ export default function LoginScreen({ navigation }) {
     try {
       const trimmedEmail = email.trim();
       const trimmedPassword = password.trim();
-  
+
       if (!trimmedEmail || !trimmedPassword) {
         alert('Email and password cannot be empty.');
         return;
       }
-  
-      await login(trimmedEmail, trimmedPassword);  // Login and send notification
-      navigation.navigate('CryptoCourses'); // Navigate to MainTabs which contains CryptoCourses
+
+      await login(trimmedEmail, trimmedPassword);
+      navigation.navigate('CryptoCourses');
     } catch (error) {
       console.error(error.message);
       if (error.code === 'auth/invalid-email') {
@@ -34,137 +41,126 @@ export default function LoginScreen({ navigation }) {
       }
     }
   };
-  
-  const handleGoogleLogin = async () => {
-    try {
-      await signInWithGoogle();
-      navigation.navigate('CryptoCourses'); // Navigate to MainTabs which contains CryptoCourses
-    } catch (error) {
-      console.error(error.message);
-      alert('An error occurred with Google Sign-In. Please try again later.');
-    }
-  };
-  
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Log In</Text>
+    <ImageBackground
+      source={require('../../assets/crypto_background.jpg')} // Image de fond avec un thème crypto
+      style={styles.background}
+    >
+      <View style={styles.container}>
+        <View style={styles.card}>
+          <Text style={styles.title}>Bienvenue</Text>
+            <Text style={styles.subtitle}>
+              Connectez-vous pour accéder aux derniers cours.
+            </Text>
 
-      <TextInput
-        value={email}
-        onChangeText={setEmail}
-        style={styles.input}
-        placeholder="Email"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
-      <TextInput
-        value={password}
-        onChangeText={setPassword}
-        style={styles.input}
-        placeholder="Password"
-        secureTextEntry
-        autoCapitalize="none"
-        autoCorrect={false}
-      />
-      <TouchableOpacity style={styles.submitButton} onPress={handlelogin}>
-        <Text style={styles.submitButtonText}>Log in</Text>
-      </TouchableOpacity>
+            <TextInput
+              value={email}
+              onChangeText={setEmail}
+              style={styles.input}
+              placeholder="Adresse e-mail"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <TextInput
+              value={password}
+              onChangeText={setPassword}
+              style={styles.input}
+              placeholder="Mot de passe"
+              secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <TouchableOpacity style={styles.submitButton} onPress={handlelogin}>
+              <Text style={styles.submitButtonText}>Se connecter</Text>
+            </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-        <Text style={styles.signUpText}>Sign Up</Text>
-      </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+              <Text style={styles.signUpText}>
+                Pas encore de compte ? Inscrivez-vous
+              </Text>
+            </TouchableOpacity>
 
-      <Text style={styles.orText}>Or Log With:</Text>
-
-      <View style={styles.socialButtonsContainer}>
-        <Button
-          color={'#4285F4'}
-          text="Google"
-          logo={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Logo_2013_Google.png/600px-Logo_2013_Google.png' }}
-          style={styles.socialButton}
-          onPress={handleGoogleLogin}
-        />
-        <Button
-          color={'#333'}
-          text="GitHub"
-          logo={{ uri: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png' }}
-          style={styles.socialButton}
-        />
-        <Button
-          color={'#3b5998'}
-          text="Facebook"
-          logo={{ uri: 'https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg' }}
-          style={styles.socialButton}
-        />
+        </View>
+        <StatusBar style="auto" />
       </View>
-
-      <StatusBar style="auto" />
-    </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    resizeMode: 'cover',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
   },
+  card: {
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)', // Fond semi-transparent
+    borderRadius: 15,
+    padding: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 10,
+  },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
+    color: '#1e3a8a', // Bleu roi
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#64748b', // Gris pour contraste
+    textAlign: 'center',
     marginBottom: 20,
-    color: '#333',
   },
   input: {
     width: '100%',
     height: 50,
-    backgroundColor: '#fff',
-    borderRadius: 5,
+    backgroundColor: '#f0f4ff', // Fond gris clair
+    borderRadius: 10,
     paddingHorizontal: 15,
     marginBottom: 15,
     borderWidth: 1,
-    borderColor: '#ddd',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 3,
+    borderColor: '#1e40af', // Bleu roi pour bordures
+    fontSize: 16,
+    color: '#1e3a8a',
   },
   submitButton: {
     width: '100%',
     height: 50,
-    backgroundColor: '#4CAF50',
-    borderRadius: 5,
+    backgroundColor: '#2563eb', // Bleu roi vif
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
   },
   submitButtonText: {
-    color: '#fff',
-    fontSize: 16,
+    color: '#ffffff',
+    fontSize: 18,
     fontWeight: 'bold',
+    textTransform: 'uppercase',
   },
   signUpText: {
-    fontSize: 16,
-    color: '#4CAF50',
-    marginBottom: 20,
-  },
-  orText: {
-    fontSize: 16,
-    color: '#666',
-    marginVertical: 10,
-  },
-  socialButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  socialButton: {
-    flex: 1,
-    marginHorizontal: 5,
+    fontSize: 14,
+    color: '#2563eb',
+    marginTop: 15,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
   },
 });
