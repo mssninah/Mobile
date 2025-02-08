@@ -5,6 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as Notifications from 'expo-notifications';
 import { registerForPushNotificationsAsync } from './src/services/pushNotificationService';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // Import screens
 import LoginScreen from './src/screen/Login';
@@ -13,6 +14,8 @@ import CryptoCoursesScreen from './src/screen/CryptoCoursesScreen';
 import WalletScreen from './src/screen/WalletScreen'; // Import Wallet Screen
 import ProfileScreen from './src/screen/ProfileScreen'; // Import Profile Screen
 import ImportFile from './src/screen/ImportFile'; // Import ImportFile Screen
+import TransactionHistoryScreen from './src/screen/TransactionHistoryScreen';
+
 
 // Create Stack Navigator
 const Stack = createStackNavigator();
@@ -60,6 +63,7 @@ export default function App() {
   };
 
   return (
+    <ThemeProvider>
     <NavigationContainer>
       <Stack.Navigator initialRouteName={isLoggedIn ? "CryptoCourses" : "Login"}>
         {/* Login Screen */}
@@ -83,7 +87,11 @@ export default function App() {
 
         {/* ImportFile Screen */}
         <Stack.Screen name="ImportFile" component={ImportFile} />
+
+         {/* History Screen */}
+         <Stack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
       </Stack.Navigator>
     </NavigationContainer>
+    </ThemeProvider>
   );
 }

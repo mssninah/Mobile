@@ -4,8 +4,10 @@ import { auth } from '../config/firebase-config';
 import { pickImageAndUpload, getProfilePictureUrl } from '../utils/uploadImageToCloudinary';
 import Footer from '../components/Footer';
 import Icon from 'react-native-vector-icons/FontAwesome'; // Importation de l'icône
+import { useTheme } from '../../contexts/ThemeContext'; // Import du contexte de thème
 
 const ProfileScreen = () => {
+  const { darkMode } = useTheme(); // Accède au mode sombre ou clair
   const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,12 +29,14 @@ const ProfileScreen = () => {
     setLoading(false);
   };
 
+  const themeStyles = darkMode ? styles.darkTheme : styles.lightTheme; // Applique les styles du mode sombre ou clair
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
+    <View style={[styles.container, themeStyles.container]}>
+      <Text style={[styles.title, themeStyles.title]}>Profile</Text>
       
       {loading ? (
-        <ActivityIndicator size="large" color="#fff" />
+        <ActivityIndicator size="large" color={themeStyles.spinnerColor} />
       ) : (
         <Image 
           source={profileImage ? { uri: profileImage } : require('../../assets/default-avatar.png')} 
@@ -40,12 +44,12 @@ const ProfileScreen = () => {
         />
       )}
 
-      <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
+      <TouchableOpacity style={[styles.uploadButton, themeStyles.uploadButton]} onPress={handleUpload}>
         <Icon name="pencil" size={20} color="#fff" />
-        <Text style={styles.uploadText}> Upload Profile Picture</Text>
+        <Text style={[styles.uploadText, themeStyles.uploadText]}> Upload Profile Picture</Text>
       </TouchableOpacity>
 
-      <Text style={styles.email}>{auth.currentUser?.email}</Text>
+      <Text style={[styles.email, themeStyles.email]}>{auth.currentUser?.email}</Text>
       <Footer/>
     </View>
   );
@@ -56,7 +60,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#2e3b4e',  // Fond de couleur cryptomonnaie
     padding: 20,
     borderRadius: 20,
     shadowColor: "#000",  // Ombre du fond pour donner de la profondeur
@@ -68,11 +71,13 @@ const styles = StyleSheet.create({
     shadowRadius: 3.5,
     elevation: 5,
   },
+
+  // Common Styles
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
     marginBottom: 30,
+    textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 10,
@@ -113,6 +118,46 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#fff',
     fontWeight: '600',
+  },
+
+  // Dark Theme Styles
+  darkTheme: {
+    container: {
+      backgroundColor: '#121212',
+    },
+    title: {
+      color: '#fff',
+    },
+    uploadButton: {
+      backgroundColor: '#007bff', // Bleu plus profond
+    },
+    uploadText: {
+      color: '#fff',
+    },
+    email: {
+      color: '#fff',
+    },
+    spinnerColor: '#00ffcc', // Couleur du spinner en mode sombre
+  },
+
+  // Light Theme Styles
+  lightTheme: {
+    container: {
+      backgroundColor: '#f4f7fc',
+    },
+    title: {
+      color: '#2F4F4F', // Dark Slate Gray
+    },
+    uploadButton: {
+      backgroundColor: '#4CAF50', // Vert lumineux
+    },
+    uploadText: {
+      color: '#fff',
+    },
+    email: {
+      color: '#333',
+    },
+    spinnerColor: '#007bff', // Bleu pour le spinner en mode clair
   },
 });
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { useNavigation } from '@react-navigation/native';
 
 const Footer = () => {
     const navigation = useNavigation();
@@ -19,13 +19,18 @@ const Footer = () => {
             </TouchableOpacity>
             
             <TouchableOpacity onPress={() => navigation.navigate('Wallet')} style={styles.iconContainer}>
-                <Icon name="wallet" size={24} color="#fff" />
+                <Icon name="money" size={24} color="#fff" />
                 <Text style={styles.iconText}>Portefeuille</Text>
             </TouchableOpacity>
-            
+
+            <TouchableOpacity onPress={() => navigation.navigate('TransactionHistory')} style={styles.iconContainer}>
+                <Icon name="history" size={24} color="#fff" />
+                <Text style={styles.iconText}>Historique</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity onPress={() => navigation.navigate('ImportFile')} style={styles.iconContainer}>
                 <Icon name="cog" size={24} color="#fff" />
-                <Text style={styles.iconText}>Settings</Text>
+                <Text style={styles.iconText}>Paramètres</Text>
             </TouchableOpacity>
         </View>
     );
@@ -36,7 +41,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
-        backgroundColor: '#1E3A8A', // Bleu foncé
+        backgroundColor: '#1E3A8A',
         paddingVertical: 10,
         position: 'absolute',
         bottom: 0,
