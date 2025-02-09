@@ -93,7 +93,10 @@ export default function WalletScreen() {
               <View style={[styles.tableRow, themeStyles.tableRow]}>
                 <Text style={[styles.tableCell, themeStyles.tableCell]}>{item.name}</Text>
                 <Text style={[styles.tableCell, themeStyles.tableCell]}>{item.quantity} units</Text>
-                <Text style={[styles.tableCell, themeStyles.tableCell]}>${item.amount}</Text>
+                <Text style={[styles.tableCell, themeStyles.tableCell]}>
+                  ${parseFloat(item.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </Text>
+
               </View>
             )}
           />

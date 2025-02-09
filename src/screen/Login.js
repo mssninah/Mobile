@@ -43,10 +43,7 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <ImageBackground
-      source={require('../../assets/crypto_background.jpg')} // Image de fond avec un thème crypto
-      style={styles.background}
-    >
+   
       <View style={styles.container}>
         <View style={styles.card}>
           <Text style={styles.title}>Bienvenue</Text>
@@ -76,16 +73,12 @@ export default function LoginScreen({ navigation }) {
               <Text style={styles.submitButtonText}>Se connecter</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-              <Text style={styles.signUpText}>
-                Pas encore de compte ? Inscrivez-vous
-              </Text>
-            </TouchableOpacity>
+            
 
         </View>
         <StatusBar style="auto" />
       </View>
-    </ImageBackground>
+  
   );
 }
 
