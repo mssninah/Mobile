@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ActivityIndicator, StyleSheet, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { pickImageAndUpload, getProfilePictureUrl } from '../utils/uploadImageToCloudinary';
 import Footer from '../components/Footer';
@@ -48,6 +48,24 @@ const ProfileScreen = () => {
 
   const themeStyles = darkMode ? styles.darkTheme : styles.lightTheme;
 
+  const openYouTube = () => {
+    Linking.openURL('https://www.youtube.com').catch(err =>
+      console.error('Erreur lors de l\'ouverture du lien YouTube :', err)
+    );
+  };
+
+  const openFacebook = () => {
+    Linking.openURL('https://www.facebook.com').catch(err =>
+      console.error('Erreur lors de l\'ouverture du lien Facebook :', err)
+    );
+  };
+
+  const openWhatsApp = () => {
+    Linking.openURL('https://www.whatsapp.com').catch(err =>
+      console.error('Erreur lors de l\'ouverture du lien WhatsApp :', err)
+    );
+  };
+
   return (
     <View style={[styles.container, themeStyles.container]}>
       <Text style={[styles.title, themeStyles.title]}>Mon Profil</Text>
@@ -55,18 +73,37 @@ const ProfileScreen = () => {
       {loading ? (
         <ActivityIndicator size="large" color={themeStyles.spinnerColor} />
       ) : (
-        <Image
-          source={profileImage ? { uri: profileImage } : require('../../assets/default-avatar.png')}
-          style={styles.profileImage}
-        />
+        <View style={styles.imageContainer}>
+          <Image
+            source={profileImage ? { uri: profileImage } : require('../../assets/default-avatar.png')}
+            style={styles.profileImage}
+          />
+          <TouchableOpacity style={styles.uploadButton} onPress={handleUpload}>
+            <Icon name="pencil" size={20} color="#fff" />
+          </TouchableOpacity>
+        </View>
       )}
 
-      <TouchableOpacity style={[styles.uploadButton, themeStyles.uploadButton]} onPress={handleUpload}>
-        <Icon name="pencil" size={20} color="#fff" />
-        <Text style={[styles.uploadText, themeStyles.uploadText]}>Changer la photo de profil</Text>
-      </TouchableOpacity>
+      <View style={styles.infoBox}>
+        <View style={styles.infoItem}>
+          <Icon name="envelope" size={20} color="#1e40af" />
+          <Text style={styles.infoText}>{email || 'Adresse email non disponible'}</Text>
+        </View>
+      </View>
 
-      <Text style={[styles.email, themeStyles.email]}>{email || 'Adresse email non disponible'}</Text>
+      <Text style={styles.findUsText}>Find us:</Text>
+      <View style={styles.socialIconsContainer}>
+        <TouchableOpacity onPress={openYouTube} style={styles.iconButton}>
+          <Icon name="youtube" size={30} color="#ff0000" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={openFacebook} style={styles.iconButton}>
+          <Icon name="facebook" size={30} color="#3b5998" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={openWhatsApp} style={styles.iconButton}>
+          <Icon name="whatsapp" size={30} color="#25d366" />
+        </TouchableOpacity>
+      </View>
+
       <Footer />
     </View>
   );
@@ -75,7 +112,6 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
     borderRadius: 20,
@@ -84,51 +120,90 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.5,
     elevation: 5,
+    backgroundColor: '#f4f7fc',
   },
   title: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: 'bold',
     marginBottom: 30,
     textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 10,
+    color: '#2F4F4F',
+  },
+  imageContainer: {
+    position: 'relative',
+    backgroundColor: '#e0f2fe',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   profileImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    borderWidth: 4,
-    borderColor: '#00ffcc',
-    marginBottom: 30,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    borderWidth: 5,
+    borderColor: '#1e40af',
+    marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
   },
   uploadButton: {
-    backgroundColor: '#007bff',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 30,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 20,
+    position: 'absolute',
+    bottom: -10,
+    right: -10,
+    backgroundColor: '#1E40AF',
+    borderRadius: 50,
+    padding: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 5,
   },
-  uploadText: {
-    color: '#fff',
+  infoBox: {
+    backgroundColor: '#f1f5f9',
+    padding: 20,
+    marginBottom: 15,
+    borderRadius: 12,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+  },
+  infoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  infoText: {
     fontSize: 16,
+    color: '#333',
     marginLeft: 10,
-    fontWeight: '600',
+    fontFamily: 'Roboto',
   },
-  email: {
-    marginTop: 20,
-    fontSize: 18,
+  findUsText: {
+    fontSize: 20,
     fontWeight: '600',
+    marginBottom: 15,
+    color: '#333',
+  },
+  socialIconsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginBottom: 30,
+  },
+  iconButton: {
+    padding: 12,
   },
   darkTheme: {
     container: {
@@ -137,16 +212,10 @@ const styles = StyleSheet.create({
     title: {
       color: '#fff',
     },
-    uploadButton: {
-      backgroundColor: '#007bff',
-    },
-    uploadText: {
-      color: '#fff',
-    },
     email: {
       color: '#fff',
     },
-    spinnerColor: '#00ffcc',
+    spinnerColor: '#1E40AF',
   },
   lightTheme: {
     container: {
@@ -155,16 +224,10 @@ const styles = StyleSheet.create({
     title: {
       color: '#2F4F4F',
     },
-    uploadButton: {
-      backgroundColor: '#4CAF50',
-    },
-    uploadText: {
-      color: '#fff',
-    },
     email: {
       color: '#333',
     },
-    spinnerColor: '#007bff',
+    spinnerColor: '#1E40AF',
   },
 });
 
