@@ -1,23 +1,46 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext'; // Import du contexte de thème
 import Footer from '../components/Footer'; // Import Footer
+import { getWallet } from '../services/walletService'; // Import du service
+
 export default function WalletScreen() {
-  
-  const { darkMode } = useTheme(); // Get the current theme mode
-  const [cryptos, setCryptos] = useState([
-    { id: '1', name: 'Bitcoin', quantity: 0.5, amount: 25000 },
-    { id: '2', name: 'Ethereum', quantity: 2, amount: 3200 },
-    { id: '3', name: 'Binance Coin', quantity: 10, amount: 3000 },
-  ]);
+  const { darkMode } = useTheme(); // Récupération du thème actuel
+  const [cryptos, setCryptos] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const totalAmount = cryptos.reduce((sum, crypto) => sum + crypto.amount, 0);
+  const totalAmount = 30000; // Balance totale statique pour le moment
 
-  const themeStyles = darkMode ? styles.darkTheme : styles.lightTheme; // Set styles based on the theme
+  const themeStyles = darkMode ? styles.darkTheme : styles.lightTheme; // Styles selon le thème
+
+  useEffect(() => {
+    const fetchCryptos = async () => {
+      setLoading(true);
+      try {
+        const walletData = await getWallet();
+
+        // Transformation des données récupérées pour l'affichage
+        const transformedData = walletData.map((wallet) => ({
+          id: wallet.idPortefeuille,
+          name: `Crypto ${wallet.idCrypto}`, // Nom fictif pour chaque crypto
+          quantity: parseFloat(wallet.quantite).toFixed(2),
+          amount: (parseFloat(wallet.quantite) * 100).toFixed(2), // Montant fictif basé sur un prix statique (100 USD par unité)
+        }));
+
+        setCryptos(transformedData);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des données du portefeuille :', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCryptos();
+  }, []);
 
   return (
     <View style={[styles.container, themeStyles.container]}>
-      {/* Main wallet balance */}
+      {/* Solde principal */}
       <View style={[styles.walletBalanceContainer, themeStyles.walletBalanceContainer]}>
         <Text style={[styles.walletBalanceText, themeStyles.walletBalanceText]}>Total Balance</Text>
         <Text style={[styles.walletBalanceAmount, themeStyles.walletBalanceAmount]}>
@@ -25,20 +48,24 @@ export default function WalletScreen() {
         </Text>
       </View>
 
-      {/* Crypto holdings table */}
+      {/* Tableau des cryptomonnaies */}
       <View style={[styles.tableContainer, themeStyles.tableContainer]}>
         <Text style={[styles.tableHeader, themeStyles.tableHeader]}>My Cryptocurrencies</Text>
-        <FlatList
-          data={cryptos}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={[styles.tableRow, themeStyles.tableRow]}>
-              <Text style={[styles.tableCell, themeStyles.tableCell]}>{item.name}</Text>
-              <Text style={[styles.tableCell, themeStyles.tableCell]}>{item.quantity} units</Text>
-              <Text style={[styles.tableCell, themeStyles.tableCell]}>${item.amount.toLocaleString()}</Text>
-            </View>
-          )}
-        />
+        {loading ? (
+          <Text style={[styles.loadingText, themeStyles.loadingText]}>Loading...</Text>
+        ) : (
+          <FlatList
+            data={cryptos}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <View style={[styles.tableRow, themeStyles.tableRow]}>
+                <Text style={[styles.tableCell, themeStyles.tableCell]}>{item.name}</Text>
+                <Text style={[styles.tableCell, themeStyles.tableCell]}>{item.quantity} units</Text>
+                <Text style={[styles.tableCell, themeStyles.tableCell]}>${item.amount}</Text>
+              </View>
+            )}
+          />
+        )}
       </View>
 
       {/* Footer */}
@@ -52,8 +79,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
-
-  // Common Styles
   walletBalanceContainer: {
     marginBottom: 24,
     padding: 24,
@@ -73,7 +98,6 @@ const styles = StyleSheet.create({
     fontSize: 34,
     fontWeight: 'bold',
   },
-  
   tableContainer: {
     flex: 1,
     borderRadius: 16,
@@ -101,60 +125,31 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '500',
   },
-
-  // Dark Theme Styles
-  darkTheme: {
-    container: {
-      backgroundColor: '#181818',
-    },
-    walletBalanceContainer: {
-      backgroundColor: '#2C6E49', // Dark green background for wallet balance
-    },
-    walletBalanceText: {
-      color: '#fff',
-    },
-    walletBalanceAmount: {
-      color: '#fff',
-    },
-    tableContainer: {
-      backgroundColor: '#222222',
-    },
-    tableHeader: {
-      color: '#fff',
-    },
-    tableRow: {
-      borderBottomColor: '#444',
-    },
-    tableCell: {
-      color: '#fff',
-    },
+  loadingText: {
+    textAlign: 'center',
+    fontSize: 16,
+    marginTop: 20,
   },
-
-  // Light Theme Styles
+  darkTheme: {
+    container: { backgroundColor: '#181818' },
+    walletBalanceContainer: { backgroundColor: '#2C6E49' },
+    walletBalanceText: { color: '#fff' },
+    walletBalanceAmount: { color: '#fff' },
+    tableContainer: { backgroundColor: '#222222' },
+    tableHeader: { color: '#fff' },
+    tableRow: { borderBottomColor: '#444' },
+    tableCell: { color: '#fff' },
+    loadingText: { color: '#fff' },
+  },
   lightTheme: {
-    container: {
-      backgroundColor: '#f9fafb',
-    },
-    walletBalanceContainer: {
-      backgroundColor: '#4CAF50', // Green background for wallet balance
-    },
-    walletBalanceText: {
-      color: '#fff',
-    },
-    walletBalanceAmount: {
-      color: '#fff',
-    },
-    tableContainer: {
-      backgroundColor: '#ffffff',
-    },
-    tableHeader: {
-      color: '#333',
-    },
-    tableRow: {
-      borderBottomColor: '#ddd',
-    },
-    tableCell: {
-      color: '#333',
-    },
+    container: { backgroundColor: '#f9fafb' },
+    walletBalanceContainer: { backgroundColor: '#4CAF50' },
+    walletBalanceText: { color: '#fff' },
+    walletBalanceAmount: { color: '#fff' },
+    tableContainer: { backgroundColor: '#ffffff' },
+    tableHeader: { color: '#333' },
+    tableRow: { borderBottomColor: '#ddd' },
+    tableCell: { color: '#333' },
+    loadingText: { color: '#333' },
   },
 });
