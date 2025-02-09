@@ -1,102 +1,92 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, CheckBox, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native'; // Import de useNavigation
-import { fetchCryptoHistory, listenToCryptoHistory } from '../services/cryptoHistoryService'; // Import des services
-
-
-// une liste de tout les crypto monnaie, 
-//avec checkbox
-//on affiche une la courbe des cryptos checker dnas le hcheckbox
-
-
-//nb montan est encore de type string
-
-// le graphe est par rapoort au montant de la cryptomonnaie 
-//une courbe des montant
-
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { getCryptoRates } from '../services/cryptoService';
+import { getCryptoHistory, listenToCryptoHistoryUpdates } from '../services/cryptoHistoryService';
 
 const CryptoGrapheScreen = () => {
-  const navigation = useNavigation(); // Utiliser le hook pour la navigation
-  const [graphData, setGraphData] = useState(null); // État pour les données du graphique
-  const [selectedCryptos, setSelectedCryptos] = useState([]); // Liste des cryptos sélectionnées
+  const [cryptos, setCryptos] = useState([]); // Liste des cryptos disponibles
+  const [selectedCrypto, setSelectedCrypto] = useState(null); // Crypto sélectionnée
+  const [cryptoHistory, setCryptoHistory] = useState([]); // Historique de la crypto sélectionnée
 
-  // Utiliser useEffect pour charger les données au montage du composant
+  // Récupérer la liste des cryptos disponibles
   useEffect(() => {
-    // Fonction pour récupérer les données historiques
-    const fetchHistoricalData = async () => {
-      const data = await fetchCryptoHistory();
-      setGraphData(data);
+    const fetchCryptos = async () => {
+      const data = await getCryptoRates(); // Appel au service pour récupérer les cryptos
+      setCryptos(data); // Mettre à jour l'état avec les cryptos disponibles
     };
 
-    // Appel à la fonction de récupération des données
-    fetchHistoricalData();
-
-    // Écoute des mises à jour en temps réel
-    const unsubscribe = listenToCryptoHistory((updatedData) => {
-      setGraphData(updatedData); // Mettre à jour les données du graphique lors des mises à jour
-    });
-
-    // Nettoyage: arrêter d'écouter lors du démontage du composant
-    return () => {
-      unsubscribe();
-    };
+    fetchCryptos();
   }, []);
 
-  // Fonction pour gérer la sélection des cryptos
-  const handleSelectCrypto = (cryptoId) => {
-    setSelectedCryptos(prevState => {
-      if (prevState.includes(cryptoId)) {
-        // Si la crypto est déjà sélectionnée, on la retire
-        return prevState.filter(id => id !== cryptoId);
-      } else {
-        // Sinon, on l'ajoute à la sélection
-        return [...prevState, cryptoId];
-      }
+  // Fonction pour gérer la sélection d'une crypto
+  const handleSelectCrypto = async (crypto) => {
+    setSelectedCrypto(crypto); // Mettre à jour la crypto sélectionnée
+
+    // Récupérer les données historiques initiales
+    const historyData = await getCryptoHistory(crypto.id);
+    setCryptoHistory(historyData); // Afficher les données historiques initiales
+
+    // Écoute des mises à jour en temps réel
+    const unsubscribe = listenToCryptoHistoryUpdates(crypto.id, (updatedHistory) => {
+      setCryptoHistory((prevHistory) => [...prevHistory, ...updatedHistory]); // Ajouter les nouvelles données à l'historique existant
     });
+
+    // Retourner une fonction de nettoyage pour arrêter l'écoute en cas de changement de crypto
+    return () => unsubscribe();
   };
 
-  // Fonction pour filtrer les données en fonction des cryptos sélectionnées
-  const filterGraphData = () => {
-    if (!graphData || selectedCryptos.length === 0) return [];
-
-    return graphData.filter(item => selectedCryptos.includes(item.idCrypto));
-  };
-
-  const filteredGraphData = filterGraphData();
+  useEffect(() => {
+    // Fonction de nettoyage de l'abonnement à l'historique
+    return () => {
+      if (selectedCrypto) {
+        listenToCryptoHistoryUpdates(selectedCrypto.id, () => {});
+      }
+    };
+  }, [selectedCrypto]);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Graphique des Cryptos</Text>
+      <Text style={styles.header}>Détails des Cryptos</Text>
 
-      {/* Liste des cryptos à sélectionner */}
+      {/* Liste des cryptos disponibles */}
       <ScrollView style={styles.cryptoList}>
-        {graphData?.map((crypto) => (
-          <View key={crypto.idCrypto} style={styles.cryptoItem}>
-            <CheckBox
-              value={selectedCryptos.includes(crypto.idCrypto)}
-              onValueChange={() => handleSelectCrypto(crypto.idCrypto)}
-            />
-            <Text style={styles.cryptoName}>{crypto.description}</Text>
-          </View>
+        {cryptos.map((crypto) => (
+          <TouchableOpacity
+            key={crypto.id}
+            style={styles.cryptoItem}
+            onPress={() => handleSelectCrypto(crypto)} // Sélectionner une crypto
+          >
+            <Text style={styles.cryptoName}>{crypto.name}</Text>
+          </TouchableOpacity>
         ))}
       </ScrollView>
 
-      {/* Affichage des données du graphique */}
-      <View style={styles.graphContainer}>
-        <Text style={styles.graphText}>
-          {filteredGraphData.length > 0
-            ? `Données des cryptos sélectionnées: ${filteredGraphData.map(item => item.montant).join(', ')}`
-            : 'Sélectionnez les cryptos pour afficher les courbes...'}
-        </Text>
-      </View>
+      {/* Détails de la crypto sélectionnée */}
+      <View style={styles.detailsContainer}>
+        {selectedCrypto ? (
+          <>
+            <Text style={styles.detailsHeader}>Détails de {selectedCrypto.name}</Text>
+            <Text>ID: {selectedCrypto.id}</Text>
+            <Text>Symbol: {selectedCrypto.symbol}</Text>
+            <Text>Prix actuel: {selectedCrypto.currentPrice} USD</Text>
 
-      {/* Retour à l'écran précédent */}
-      <TouchableOpacity 
-        style={styles.button} 
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={styles.buttonText}>Retour</Text>
-      </TouchableOpacity>
+            <Text style={styles.historyHeader}>Historique :</Text>
+            <ScrollView style={styles.historyList}>
+              {cryptoHistory.length > 0 ? (
+                cryptoHistory.map((entry, index) => (
+                  <Text key={index}>
+                    {entry.dateCours.toLocaleString()} : {entry.montant} USD
+                  </Text>
+                ))
+              ) : (
+                <Text>Aucun historique disponible.</Text>
+              )}
+            </ScrollView>
+          </>
+        ) : (
+          <Text style={styles.noSelectionText}>Sélectionnez une crypto pour voir les détails.</Text>
+        )}
+      </View>
     </View>
   );
 };
@@ -112,41 +102,59 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 20,
+    color: '#1e3a8a',
   },
   cryptoList: {
+    maxHeight: 150,
     marginBottom: 20,
+    borderRadius: 8,
+    backgroundColor: '#fff',
     padding: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   cryptoItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
   cryptoName: {
     fontSize: 16,
-    marginLeft: 10,
   },
-  graphContainer: {
-    marginBottom: 20,
-    padding: 10,
-    backgroundColor: '#e4e4e4',
+  detailsContainer: {
+    marginTop: 20,
+    padding: 16,
+    backgroundColor: '#fff',
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  graphText: {
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  button: {
-    padding: 12,
-    backgroundColor: '#007BFF',
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
+  detailsHeader: {
     fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#1e40af',
+  },
+  historyHeader: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 20,
+    marginBottom: 10,
+    color: '#1e40af',
+  },
+  historyList: {
+    maxHeight: 200, // Définir une hauteur pour permettre le défilement
+  },
+  noSelectionText: {
+    fontSize: 16,
+    color: '#6c757d',
+    textAlign: 'center',
   },
 });
 

@@ -46,7 +46,7 @@ export const getCryptoRates = async () => {
       console.log('Montant valide?', isValidMontant);
 
       cryptoData.push({
-        id: data.idCrypto,
+        id: data.cryptomonnaie.idCrypto,
         name: data.cryptomonnaie.description,
         val: data.cryptomonnaie.val,
         montant: isValidMontant ? montant : 0, // Si montant invalide, on le remplace par 0
@@ -103,7 +103,7 @@ export const listenToCryptoRates = (setCryptoRates) => {
       console.log('Montant valide?', isValidMontant);
 
       cryptoData.push({
-        id: data.idCrypto,
+        id: data.cryptomonnaie.idCrypto,
         name: data.cryptomonnaie.description,
         val: data.cryptomonnaie.val,
         montant: isValidMontant ? montant : 0, // Si montant invalide, on le remplace par 0

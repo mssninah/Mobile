@@ -9,7 +9,6 @@ const CryptoCoursesScreen = () => {
   const navigation = useNavigation();
   const { darkMode } = useTheme(); // Accède au mode sombre ou clair
   const [cryptos, setCryptos] = useState([]); // État pour stocker les données des cryptos
-  const [selectedCrypto, setSelectedCrypto] = useState(null); // Crypto sélectionnée
 
   // Récupère les données au montage du composant
   useEffect(() => {

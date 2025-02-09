@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   card: {
     width: '100%',
     maxWidth: 400,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)', // Fond semi-transparent
+    backgroundColor: 'rgba(221, 201, 201, 0.9)', // Fond semi-transparent
     borderRadius: 15,
     padding: 25,
     shadowColor: '#000',
