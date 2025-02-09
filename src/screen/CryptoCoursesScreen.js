@@ -29,19 +29,18 @@ const CryptoCoursesScreen = () => {
     <View style={[styles.container, themeStyles.container]}>
       <Text style={[styles.header, themeStyles.header]}>Crypto Courses</Text>
 
-     
-
+      {/* Bouton pour voir la courbe */}
       <TouchableOpacity
-            style={[styles.button, themeStyles.button]}
-            onPress={() => navigation.navigate('CryptoGraphe')} // Redirige vers CryptoGrapheScreen
-          >
-            <Text style={[styles.buttonText, themeStyles.buttonText]}>Voir la courbe</Text>
+        style={[styles.button, themeStyles.button]}
+        onPress={() => navigation.navigate('CryptoGraphe')} // Redirige vers CryptoGrapheScreen
+      >
+        <Text style={[styles.buttonText, themeStyles.buttonText]}>Voir la courbe</Text>
       </TouchableOpacity>
 
       {/* Affichage des cryptos */}
       <ScrollView style={[styles.cryptoList, themeStyles.cryptoList]}>
         {cryptos.map((crypto, index) => (
-          <View key={`${crypto.name}-${index}`} style={styles.cryptoItem}>
+          <View key={`${crypto.name}-${index}`} style={[styles.cryptoItem, themeStyles.cryptoItem]}>
             <Text style={[styles.cryptoName, themeStyles.cryptoName]}>
               {crypto.name}
             </Text>
@@ -57,9 +56,6 @@ const CryptoCoursesScreen = () => {
           </View>
         ))}
       </ScrollView>
-
-
-
 
       {/* Footer */}
       <Footer />
@@ -78,10 +74,22 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: 'center',
   },
-  picker: {
-    height: 50,
-    width: '100%',
-    marginBottom: 16,
+  button: {
+    marginVertical: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    backgroundColor: '#1e40af', // Bleu roi
+    borderRadius: 8,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  buttonText: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: '600',
   },
   cryptoList: {
     marginTop: 16,
@@ -91,11 +99,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     padding: 16,
     backgroundColor: '#f1f5f9',
-    borderRadius: 8,
+    borderRadius: 10,
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 6,
+    elevation: 3,
   },
   cryptoName: {
     fontSize: 18,
@@ -114,18 +122,23 @@ const styles = StyleSheet.create({
     header: {
       color: '#fff',
     },
-    picker: {
-      backgroundColor: '#333',
+    button: {
+      backgroundColor: '#1e40af',
+    },
+    buttonText: {
       color: '#fff',
     },
     cryptoList: {
+      backgroundColor: '#1c1c1c',
+    },
+    cryptoItem: {
       backgroundColor: '#333',
     },
     cryptoName: {
       color: '#fff',
     },
     cryptoDetails: {
-      color: '#fff',
+      color: '#bbb',
     },
   },
 
@@ -137,18 +150,23 @@ const styles = StyleSheet.create({
     header: {
       color: '#1F2937',
     },
-    picker: {
-      backgroundColor: '#ffffff',
-      color: '#1F2937',
+    button: {
+      backgroundColor: '#1e40af',
+    },
+    buttonText: {
+      color: '#fff',
     },
     cryptoList: {
       backgroundColor: '#ffffff',
+    },
+    cryptoItem: {
+      backgroundColor: '#f9fafb',
     },
     cryptoName: {
       color: '#1F2937',
     },
     cryptoDetails: {
-      color: '#1F2937',
+      color: '#555',
     },
   },
 });

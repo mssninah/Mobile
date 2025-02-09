@@ -1,6 +1,6 @@
 import React from 'react';
 import { logout } from '../services/authService';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext'; // Import du contexte
 import Footer from '../components/Footer';
 import Icon from 'react-native-vector-icons/Feather'; // Import des icônes
@@ -20,24 +20,36 @@ const ImportFile = ({ navigation }) => {
 
   return (
     <View style={[styles.container, themeStyles.container]}>
-      <Text style={[styles.message, themeStyles.message]}>Logged successfully</Text>
+      {/* Header */}
+      <Text style={[styles.header, themeStyles.header]}>Paramètres</Text>
 
-      {/* Log Out Button */}
-      <TouchableOpacity style={[styles.button, themeStyles.button]} onPress={handleLogout}>
-        <Text style={[styles.buttonText, themeStyles.buttonText]}>Log Out</Text>
-      </TouchableOpacity>
-
-      {/* Dark Mode toggle with icons */}
-      <TouchableOpacity style={styles.modeToggle} onPress={toggleDarkMode}>
-        <Icon
-          name={darkMode ? 'sun' : 'moon'} // Sun icon for light mode, Moon icon for dark mode
-          size={24}
-          color={darkMode ? '#FFD700' : '#000'} // Yellow for sun (light mode), black for moon (dark mode)
+     
+      {/* Light/Dark Mode toggle with a checkbox */}
+      <View style={[styles.toggleContainer, themeStyles.toggleContainer]}>
+        <Text style={[styles.toggleText, themeStyles.toggleText]}>Mode Sombre</Text>
+        <Switch
+          value={darkMode}
+          onValueChange={toggleDarkMode}
+          trackColor={{ false: '#767577', true: '#4B9CD3' }}
+          thumbColor={darkMode ? '#fff' : '#f4f3f4'}
         />
-        <Text style={[themeStyles.message, styles.modeToggleText]}>
-          {darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-        </Text>
+      </View>
+
+       {/* Log Out Button */}
+       <TouchableOpacity style={[styles.button, themeStyles.button]} onPress={handleLogout}>
+        <Text style={[styles.buttonText, themeStyles.buttonText]}>Déconnexion</Text>
       </TouchableOpacity>
+
+
+      {/* Help Button */}
+      <TouchableOpacity style={[styles.button, themeStyles.button]}>
+        <Text style={[styles.buttonText, themeStyles.buttonText]}>Aide</Text>
+      </TouchableOpacity>
+
+      {/* Developer Signature */}
+      <Text style={[styles.signature, themeStyles.signature]}>
+        @Copyright(2025), All rights reserved
+      </Text>
 
       <Footer />
     </View>
@@ -47,82 +59,101 @@ const ImportFile = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
   },
-  message: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+  header: {
+    fontSize: 28,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginVertical: 20,
   },
+  button: {
+    backgroundColor: '#6200EE',
+    borderRadius: 8,
+    marginBottom: 20,
+    width: '80%',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    alignSelf: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#e0f2fe',
+    borderRadius: 10,
+    padding: 10,
+    marginVertical: 20,
+  },
+  toggleText: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  signature: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#666',
+    marginTop: 20,
+  },
+
+  // Dark Theme Styles
   darkTheme: {
     container: {
       backgroundColor: '#121212',
     },
-    message: {
+    header: {
       color: '#fff',
     },
     button: {
-      backgroundColor: '#6200EE',
-      shadowColor: '#000',
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 5,
+      backgroundColor: '#4B9CD3',
     },
     buttonText: {
       color: '#fff',
-      fontSize: 18,
-      textAlign: 'center',
-      paddingVertical: 12,
-      paddingHorizontal: 30,
-      fontWeight: 'bold',
     },
-    modeToggleText: {
+    toggleContainer: {
+      backgroundColor: '#333',
+    },
+    toggleText: {
       color: '#fff',
-      marginLeft: 10, // Adds space between icon and text
-      fontSize: 18,
-      fontWeight: '600',
+    },
+    signature: {
+      color: '#ddd',
     },
   },
+
+  // Light Theme Styles
   lightTheme: {
     container: {
       backgroundColor: '#fff',
     },
-    message: {
+    header: {
       color: '#000',
     },
     button: {
       backgroundColor: '#6200EE',
-      shadowColor: '#000',
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
-      elevation: 5,
     },
     buttonText: {
       color: '#fff',
-      fontSize: 18,
-      textAlign: 'center',
-      paddingVertical: 12,
-      paddingHorizontal: 30,
-      fontWeight: 'bold',
     },
-    modeToggleText: {
+    toggleContainer: {
+      backgroundColor: '#e0f2fe',
+    },
+    toggleText: {
       color: '#000',
-      marginLeft: 10, // Adds space between icon and text
-      fontSize: 18,
-      fontWeight: '600',
     },
-  },
-  button: {
-    borderRadius: 8,
-    marginBottom: 20,
-    width: '80%',
-  },
-  modeToggle: {
-    flexDirection: 'row', // Makes the icon and text appear next to each other
-    alignItems: 'center',
-    marginTop: 20,
+    signature: {
+      color: '#333',
+    },
   },
 });
 

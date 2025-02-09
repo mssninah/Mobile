@@ -72,8 +72,6 @@ export default function TransactionHistoryScreen() {
   );
 }
 
-
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -101,7 +99,7 @@ const styles = StyleSheet.create({
   },
   tableHeaderRow: {
     flexDirection: 'row',
-    borderBottomWidth: 1,
+    borderBottomWidth: 2,
     borderBottomColor: '#ddd',
     paddingBottom: 12,
     marginBottom: 16,
@@ -112,6 +110,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     color: '#333',
+    paddingVertical: 8,
   },
   tableRow: {
     flexDirection: 'row',
