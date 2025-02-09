@@ -1,56 +1,73 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
-import { auth } from '../config/firebase-config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { pickImageAndUpload, getProfilePictureUrl } from '../utils/uploadImageToCloudinary';
 import Footer from '../components/Footer';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Importation de l'icône
-import { useTheme } from '../../contexts/ThemeContext'; // Import du contexte de thème
+import Icon from 'react-native-vector-icons/FontAwesome';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const ProfileScreen = () => {
-  const { darkMode } = useTheme(); // Accède au mode sombre ou clair
+  const { darkMode } = useTheme();
   const [profileImage, setProfileImage] = useState(null);
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProfileImage = async () => {
+    const fetchUserData = async () => {
       setLoading(true);
-      const imageUrl = await getProfilePictureUrl();
-      if (imageUrl) setProfileImage(imageUrl);
-      setLoading(false);
+
+      try {
+        const authData = await AsyncStorage.getItem('auth_connected');
+        if (authData) {
+          const parsedData = JSON.parse(authData);
+          setEmail(parsedData.mail);
+          const imageUrl = parsedData.img || (await getProfilePictureUrl());
+          setProfileImage(imageUrl);
+        }
+      } catch (error) {
+        console.error('Erreur lors du chargement des données utilisateur :', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    fetchProfileImage();
+    fetchUserData();
   }, []);
 
   const handleUpload = async () => {
     setLoading(true);
-    const uploadedImageUrl = await pickImageAndUpload();
-    if (uploadedImageUrl) setProfileImage(uploadedImageUrl);
-    setLoading(false);
+    try {
+      const uploadedImageUrl = await pickImageAndUpload();
+      if (uploadedImageUrl) setProfileImage(uploadedImageUrl);
+    } catch (error) {
+      console.error('Erreur lors du téléchargement de l\'image :', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const themeStyles = darkMode ? styles.darkTheme : styles.lightTheme; // Applique les styles du mode sombre ou clair
+  const themeStyles = darkMode ? styles.darkTheme : styles.lightTheme;
 
   return (
     <View style={[styles.container, themeStyles.container]}>
-      <Text style={[styles.title, themeStyles.title]}>Profile</Text>
-      
+      <Text style={[styles.title, themeStyles.title]}>Mon Profil</Text>
+
       {loading ? (
         <ActivityIndicator size="large" color={themeStyles.spinnerColor} />
       ) : (
-        <Image 
-          source={profileImage ? { uri: profileImage } : require('../../assets/default-avatar.png')} 
-          style={styles.profileImage} 
+        <Image
+          source={profileImage ? { uri: profileImage } : require('../../assets/default-avatar.png')}
+          style={styles.profileImage}
         />
       )}
 
       <TouchableOpacity style={[styles.uploadButton, themeStyles.uploadButton]} onPress={handleUpload}>
         <Icon name="pencil" size={20} color="#fff" />
-        <Text style={[styles.uploadText, themeStyles.uploadText]}> Upload Profile Picture</Text>
+        <Text style={[styles.uploadText, themeStyles.uploadText]}>Changer la photo de profil</Text>
       </TouchableOpacity>
 
-      <Text style={[styles.email, themeStyles.email]}>{auth.currentUser?.email}</Text>
-      <Footer/>
+      <Text style={[styles.email, themeStyles.email]}>{email || 'Adresse email non disponible'}</Text>
+      <Footer />
     </View>
   );
 };
@@ -62,17 +79,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderRadius: 20,
-    shadowColor: "#000",  // Ombre du fond pour donner de la profondeur
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.25,
     shadowRadius: 3.5,
     elevation: 5,
   },
-
-  // Common Styles
   title: {
     fontSize: 28,
     fontWeight: 'bold',
@@ -87,7 +99,7 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 75,
     borderWidth: 4,
-    borderColor: '#00ffcc', // Couleur de bordure inspirée de la cryptomonnaie
+    borderColor: '#00ffcc',
     marginBottom: 30,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
@@ -95,7 +107,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
   },
   uploadButton: {
-    backgroundColor: '#007bff',  // Bleu cryptomonnaie
+    backgroundColor: '#007bff',
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 30,
@@ -116,11 +128,8 @@ const styles = StyleSheet.create({
   email: {
     marginTop: 20,
     fontSize: 18,
-    color: '#fff',
     fontWeight: '600',
   },
-
-  // Dark Theme Styles
   darkTheme: {
     container: {
       backgroundColor: '#121212',
@@ -129,7 +138,7 @@ const styles = StyleSheet.create({
       color: '#fff',
     },
     uploadButton: {
-      backgroundColor: '#007bff', // Bleu plus profond
+      backgroundColor: '#007bff',
     },
     uploadText: {
       color: '#fff',
@@ -137,19 +146,17 @@ const styles = StyleSheet.create({
     email: {
       color: '#fff',
     },
-    spinnerColor: '#00ffcc', // Couleur du spinner en mode sombre
+    spinnerColor: '#00ffcc',
   },
-
-  // Light Theme Styles
   lightTheme: {
     container: {
       backgroundColor: '#f4f7fc',
     },
     title: {
-      color: '#2F4F4F', // Dark Slate Gray
+      color: '#2F4F4F',
     },
     uploadButton: {
-      backgroundColor: '#4CAF50', // Vert lumineux
+      backgroundColor: '#4CAF50',
     },
     uploadText: {
       color: '#fff',
@@ -157,7 +164,7 @@ const styles = StyleSheet.create({
     email: {
       color: '#333',
     },
-    spinnerColor: '#007bff', // Bleu pour le spinner en mode clair
+    spinnerColor: '#007bff',
   },
 });
 

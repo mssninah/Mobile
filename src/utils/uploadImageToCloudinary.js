@@ -1,5 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
-import { auth, db } from '../config/firebase-config';
+import { db } from '../config/firebase-config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 // Fonction pour prendre une photo et l'uploader sur Cloudinary
