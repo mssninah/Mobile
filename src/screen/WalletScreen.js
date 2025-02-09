@@ -2,50 +2,82 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext'; // Import du contexte de thème
 import Footer from '../components/Footer'; // Import Footer
-import { getWallet } from '../services/walletService'; // Import du service
-
+import { getWallet, getTotalBalance } from '../services/walletService'; // Import du service
+import { getCryptoRates } from '../services/cryptoService';
 export default function WalletScreen() {
   const { darkMode } = useTheme(); // Récupération du thème actuel
   const [cryptos, setCryptos] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const totalAmount = 30000; // Balance totale statique pour le moment
+  const [totalBalance, setTotalBalance] = useState(0);
 
   const themeStyles = darkMode ? styles.darkTheme : styles.lightTheme; // Styles selon le thème
 
   useEffect(() => {
+    
+   
     const fetchCryptos = async () => {
       setLoading(true);
       try {
+        // Récupérer les données du portefeuille
         const walletData = await getWallet();
-
-        // Transformation des données récupérées pour l'affichage
-        const transformedData = walletData.map((wallet) => ({
-          id: wallet.idPortefeuille,
-          name: `Crypto ${wallet.idCrypto}`, // Nom fictif pour chaque crypto
-          quantity: parseFloat(wallet.quantite).toFixed(2),
-          amount: (parseFloat(wallet.quantite) * 100).toFixed(2), // Montant fictif basé sur un prix statique (100 USD par unité)
-        }));
-
+    
+        // Récupérer les cours des cryptos
+        const cryptoRates = await getCryptoRates();
+    
+        // Associer les données du portefeuille avec les cours des cryptos
+        const transformedData = walletData.map((wallet) => {
+          // Trouver le cours correspondant à l'idCrypto dans `cryptoRates`
+          const cryptoRate = cryptoRates.find((rate) => rate.id.toString() === wallet.id.toString());
+    
+          // Si correspondance trouvée, on utilise le nom et le cours
+          const name = cryptoRate ? cryptoRate.name : `Crypto ${wallet.id}`;
+          const rate = cryptoRate ? cryptoRate.montant : 1; // Si pas de cours trouvé, on utilise 1 par défaut
+    
+          return {
+            id: wallet.id, // ID du portefeuille
+            name, // Nom réel ou fictif de la crypto
+            quantity: parseFloat(wallet.quantity).toFixed(2), // Quantité dans le portefeuille
+            amount: (parseFloat(wallet.quantity) * rate).toFixed(2), // Montant total basé sur le cours
+          };
+        });
+    
+        // Mettre à jour l'état avec les données transformées
         setCryptos(transformedData);
       } catch (error) {
-        console.error('Erreur lors de la récupération des données du portefeuille :', error);
+        console.error('Erreur lors de la récupération des données du portefeuille ou des cours :', error);
       } finally {
         setLoading(false);
       }
     };
+    
 
+    const fetchBalance = async () => {
+      try {
+        const balance = await getTotalBalance();
+        setTotalBalance(parseFloat(balance).toFixed(2));
+      } catch (error) {
+        console.error("Erreur lors de la récupération du solde total :", error);
+      }
+    };
+
+    fetchBalance();
     fetchCryptos();
   }, []);
 
   return (
     <View style={[styles.container, themeStyles.container]}>
       {/* Solde principal */}
-      <View style={[styles.walletBalanceContainer, themeStyles.walletBalanceContainer]}>
-        <Text style={[styles.walletBalanceText, themeStyles.walletBalanceText]}>Total Balance</Text>
-        <Text style={[styles.walletBalanceAmount, themeStyles.walletBalanceAmount]}>
-          ${totalAmount.toLocaleString()}
+      <View style={styles.walletBalanceContainer}>
+        <Text style={styles.walletBalanceText}>Total Balance</Text>
+        {loading ? (
+          <Text style={styles.walletBalanceAmount}>Loading...</Text>
+        ) : 
+        (
+        <Text style={styles.walletBalanceAmount}>
+          ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalBalance)}
         </Text>
+        
+        )}
       </View>
 
       {/* Tableau des cryptomonnaies */}
