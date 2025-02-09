@@ -1,0 +1,16 @@
+# Ignore node_modules
+node_modules/
+
+# Ignore build directories
+.expo/
+build/
+dist/
+
+# Ignore other unnecessary files
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.DS_Store
+*.env
