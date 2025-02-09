@@ -2,8 +2,23 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext'; // Import du contexte de thème
 import Footer from '../components/Footer'; // Import Footer
-
+import getFirestoreUserDocument from '../services/getFirestoreUserDocument';
 export default function WalletScreen() {
+  const fetchFirestoreUser = async () => {
+    try {
+      const userDoc = await getFirestoreUserDocument();
+      if (userDoc) {
+        console.log("Document utilisateur récupéré :", userDoc);
+      } else {
+        console.log("Document utilisateur non trouvé.");
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération du document utilisateur :", error);
+    }
+  };
+  
+
+  fetchFirestoreUser();
   const { darkMode } = useTheme(); // Get the current theme mode
   const [cryptos, setCryptos] = useState([
     { id: '1', name: 'Bitcoin', quantity: 0.5, amount: 25000 },

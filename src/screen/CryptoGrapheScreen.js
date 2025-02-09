@@ -1,3 +1,241 @@
+// import React, { useState, useEffect } from 'react';
+// import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+// import { LineChart } from 'react-native-chart-kit';
+// import { getCryptoRates } from '../services/cryptoService';
+// import { getCryptoHistory, listenToCryptoHistoryUpdates } from '../services/cryptoHistoryService';
+
+// // Fonction pour générer une couleur hexadécimale aléatoire
+// const getRandomColor = (existingColors) => {
+//   const letters = '0123456789ABCDEF';
+//   let color = '#';
+//   for (let i = 0; i < 6; i++) {
+//     color += letters[Math.floor(Math.random() * 16)];
+//   }
+  
+//   // Vérifie si la couleur existe déjà
+//   while (existingColors.includes(color)) {
+//     color = '#';
+//     for (let i = 0; i < 6; i++) {
+//       color += letters[Math.floor(Math.random() * 16)];
+//     }
+//   }
+
+//   return color;
+// };
+
+// const CryptoGrapheScreen = () => {
+//   const [cryptos, setCryptos] = useState([]); // Liste des cryptos disponibles
+//   const [selectedCryptos, setSelectedCryptos] = useState([]); // Cryptos sélectionnées
+//   const [cryptoHistory, setCryptoHistory] = useState({}); // Historique des cryptos sélectionnées
+//   const [cryptoColors, setCryptoColors] = useState({}); // Couleurs générées pour chaque crypto
+
+//   // Récupérer la liste des cryptos disponibles
+//   useEffect(() => {
+//     const fetchCryptos = async () => {
+//       const data = await getCryptoRates(); // Appel au service pour récupérer les cryptos
+//       setCryptos(data); // Mettre à jour l'état avec les cryptos disponibles
+
+//       // Générer une couleur unique pour chaque crypto
+//       const colors = {};
+//       const existingColors = [];
+//       data.forEach((crypto) => {
+//         const color = getRandomColor(existingColors); // Générer une couleur unique pour chaque crypto
+//         colors[crypto.id] = color;
+//         existingColors.push(color); // Ajouter cette couleur à la liste des couleurs existantes
+//       });
+
+//       setCryptoColors(colors);
+//     };
+
+//     fetchCryptos();
+//   }, []);
+
+//   // Fonction pour gérer la sélection d'une crypto
+//   const handleSelectCrypto = async (crypto) => {
+//     if (selectedCryptos.includes(crypto.id)) {
+//       setSelectedCryptos(selectedCryptos.filter((id) => id !== crypto.id)); // Désélectionner la crypto
+//     } else {
+//       setSelectedCryptos([...selectedCryptos, crypto.id]); // Sélectionner la crypto
+//     }
+//   };
+
+//   // Fonction pour récupérer l'historique de la crypto
+//   useEffect(() => {
+//     // Ne commencer à écouter que si des cryptos sont sélectionnées
+//     if (selectedCryptos.length > 0) {
+//       selectedCryptos.forEach(async (cryptoId) => {
+//         // Récupérer les données historiques si elles ne sont pas déjà présentes
+//         if (!cryptoHistory[cryptoId]) {
+//           const historyData = await getCryptoHistory(cryptoId); // Récupérer l'historique pour cette crypto
+//           setCryptoHistory((prevData) => ({
+//             ...prevData,
+//             [cryptoId]: historyData,
+//           }));
+//         }
+
+//         // Écoute des mises à jour en temps réel
+//         const unsubscribe = listenToCryptoHistoryUpdates(cryptoId, (updatedHistory) => {
+//           setCryptoHistory((prevData) => ({
+//             ...prevData,
+//             [cryptoId]: updatedHistory,
+//           }));
+//         });
+
+//         // Retourner la fonction de nettoyage pour arrêter l'écoute en cas de changement de crypto
+//         return () => unsubscribe();
+//       });
+//     }
+//   }, [selectedCryptos, cryptoHistory]); // Cette useEffect se déclenche chaque fois qu'un crypto est ajoutée ou enlevée
+
+//   // Préparer les données du graphique pour chaque crypto sélectionnée
+//   const chartData = {
+//     labels: selectedCryptos.length > 0 && cryptoHistory[selectedCryptos[0]] ? 
+//       cryptoHistory[selectedCryptos[0]].map(entry => new Date(entry.dateCours).toLocaleTimeString()) : [], // Labels des heures
+//     datasets: selectedCryptos.map((cryptoId) => ({
+//       data: cryptoHistory[cryptoId]?.map(entry => parseFloat(entry.montant)) || [],
+//       strokeWidth: 2,
+//       color: () => cryptoColors[cryptoId], // Utilise la couleur générée pour chaque crypto
+//     }))
+//   };
+
+//   return (
+//     <View style={styles.container}>
+//       <Text style={styles.header}>Graphique des Cryptos</Text>
+
+//       {/* Liste des cryptos disponibles */}
+//       <ScrollView style={styles.cryptoList}>
+//         {cryptos.map((crypto) => (
+//           <TouchableOpacity
+//             key={crypto.id}
+//             style={styles.cryptoItem}
+//             onPress={() => handleSelectCrypto(crypto)} // Sélectionner ou désélectionner une crypto
+//           >
+//             <View
+//               style={[
+//                 styles.checkbox,
+//                 {
+//                   borderColor: cryptoColors[crypto.id],
+//                   backgroundColor: selectedCryptos.includes(crypto.id) ? cryptoColors[crypto.id] : 'transparent',
+//                 },
+//               ]}
+//             />
+//             <Text style={styles.cryptoName}>{crypto.name}</Text>
+//           </TouchableOpacity>
+//         ))}
+//       </ScrollView>
+
+//       {/* Légende des cryptos sélectionnées */}
+//       <View style={styles.legendContainer}>
+//         {selectedCryptos.length > 0 && selectedCryptos.map((cryptoId) => (
+//           <View key={cryptoId} style={styles.legendItem}>
+//             <View style={[styles.legendColorBox, { backgroundColor: cryptoColors[cryptoId] }]} />
+//             <Text>{cryptos.find(crypto => crypto.id === cryptoId)?.name}</Text>
+//           </View>
+//         ))}
+//       </View>
+
+//       {/* Affichage du graphique */}
+//       <View style={styles.graphContainer}>
+//         {selectedCryptos.length > 0 ? (
+//           <LineChart
+//             data={chartData}
+//             width={Dimensions.get('window').width - 32}
+//             height={300}
+//             chartConfig={{
+//               backgroundColor: '#1c313a',
+//               backgroundGradientFrom: '#457b9d',
+//               backgroundGradientTo: '#1d3557',
+//               decimalPlaces: 2,
+//               color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+//               labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+//               style: { borderRadius: 8 },
+//               propsForDots: {
+//                 r: '6',
+//                 strokeWidth: '2',
+//                 stroke: '#ffa726',
+//               },
+//             }}
+//             bezier
+//             style={styles.chart}
+//           />
+//         ) : (
+//           <Text style={styles.graphText}>Sélectionnez des cryptos pour afficher le graphique.</Text>
+//         )}
+//       </View>
+//     </View>
+//   );
+// };
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     padding: 16,
+//     backgroundColor: '#f1f5f9',
+//   },
+//   header: {
+//     fontSize: 24,
+//     fontWeight: 'bold',
+//     textAlign: 'center',
+//     marginBottom: 20,
+//     color: '#1e3a8a',
+//   },
+//   cryptoList: {
+//     maxHeight: 150,
+//     marginBottom: 20,
+//     borderRadius: 8,
+//     backgroundColor: '#fff',
+//     padding: 10,
+//     shadowColor: '#000',
+//     shadowOffset: { width: 0, height: 2 },
+//     shadowOpacity: 0.1,
+//     shadowRadius: 4,
+//     elevation: 2,
+//   },
+//   cryptoItem: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     marginBottom: 10,
+//   },
+//   checkbox: {
+//     width: 20,
+//     height: 20,
+//     borderWidth: 2,
+//     borderRadius: 4,
+//     marginRight: 10,
+//   },
+//   cryptoName: {
+//     fontSize: 16,
+//   },
+//   legendContainer: {
+//     marginBottom: 20,
+//   },
+//   legendItem: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     marginBottom: 10,
+//   },
+//   legendColorBox: {
+//     width: 20,
+//     height: 20,
+//     borderRadius: 4,
+//     marginRight: 10,
+//   },
+//   graphContainer: {
+//     alignItems: 'center',
+//   },
+//   graphText: {
+//     fontSize: 16,
+//     color: '#1e3a8a',
+//   },
+//   chart: {
+//     borderRadius: 8,
+//     marginBottom: 20,
+//   },
+// });
+
+// export default CryptoGrapheScreen;
+
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { getCryptoRates } from '../services/cryptoService';
@@ -151,251 +389,3 @@ const styles = StyleSheet.create({
 });
 
 export default CryptoGrapheScreen;
-
-
-// import React, { useState, useEffect } from 'react';
-// import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-// import { LineChart } from 'react-native-chart-kit';
-// import { getCryptoRates } from '../services/cryptoService'; // Importer le service crypto
-// import { getCryptoHistory, listenToCryptoHistoryUpdates } from '../services/cryptoHistoryService';
-
-// // Fonction pour générer une couleur hexadécimale aléatoire
-// const getRandomColor = (existingColors) => {
-//   const letters = '0123456789ABCDEF';
-//   let color = '#';
-//   // Génère une couleur aléatoire
-//   for (let i = 0; i < 6; i++) {
-//     color += letters[Math.floor(Math.random() * 16)];
-//   }
-
-//   // Vérifier si cette couleur existe déjà, si oui, régénérer
-//   while (existingColors.includes(color)) {
-//     color = '#';
-//     for (let i = 0; i < 6; i++) {
-//       color += letters[Math.floor(Math.random() * 16)];
-//     }
-//   }
-
-//   return color;
-// };
-
-// const CryptoGrapheScreen = ({ navigation }) => {
-//   const [selectedCryptos, setSelectedCryptos] = useState([]); // Cryptos sélectionnées
-//   const [cryptoHistory, setCryptoHistory] = useState({}); // Historique des cryptos sélectionnées
-//   const [cryptos, setCryptos] = useState([]); // Liste des cryptos disponibles
-//   const [cryptoColors, setCryptoColors] = useState({}); // Couleurs générées pour chaque crypto
-
-//   // Récupérer les cryptos disponibles
-//   useEffect(() => {
-//     const fetchCryptos = async () => {
-//       const data = await getCryptoRates(); // Récupérer la liste des cryptos
-//       setCryptos(data); // Mettre à jour la liste des cryptos
-
-//       // Générer une couleur unique pour chaque crypto
-//       const colors = {};
-//       const existingColors = []; // Liste pour vérifier les couleurs déjà utilisées
-
-//       data.forEach((crypto) => {
-//         const color = getRandomColor(existingColors); // Générer une couleur unique
-//         colors[crypto.id] = color; // Attribuer la couleur au crypto
-//         existingColors.push(color); // Ajouter la couleur à la liste des couleurs utilisées
-//       });
-
-//       setCryptoColors(colors); // Mettre à jour l'état des couleurs
-//     };
-
-//     fetchCryptos();
-//   }, []);
-
-//   // Fonction pour récupérer les données historiques à jour
-//   useEffect(() => {
-//     selectedCryptos.forEach((cryptoId) => {
-//       // Récupérer les données historiques de chaque crypto sélectionnée
-//       getCryptoHistory(cryptoId).then((historyData) => {
-//         setCryptoHistory((prevData) => ({
-//           ...prevData,
-//           [cryptoId]: historyData, // Met à jour les données historiques
-//         }));
-//       });
-
-//       // Écoute en temps réel des données historiques de chaque crypto
-//       listenToCryptoHistoryUpdates(cryptoId, (updatedHistoryData) => {
-//         setCryptoHistory((prevData) => ({
-//           ...prevData,
-//           [cryptoId]: updatedHistoryData,
-//         }));
-//       });
-//     });
-//   }, [selectedCryptos]);
-
-//   // Gestion de la sélection/désélection des cryptos
-//   const handleSelectCrypto = (cryptoId) => {
-//     setSelectedCryptos((prevSelected) =>
-//       prevSelected.includes(cryptoId)
-//         ? prevSelected.filter((id) => id !== cryptoId)
-//         : [...prevSelected, cryptoId]
-//     );
-//   };
-
-//   // Filtrer les données des cryptos sélectionnées
-//   const filteredData = cryptos.filter((crypto) => selectedCryptos.includes(crypto.id));
-
-//   // Préparer les données pour le graphique
-
-
-//   // Préparer les données pour le graphique
-// const chartData = {
-//   labels: ['10 min', '9 min', '8 min', '7 min', '6 min'], // Labels des 10 dernières minutes
-//   datasets: filteredData.map((crypto) => ({
-//     data: cryptoHistory[crypto.id]?.map((entry) => entry.montant) || [], // Récupère les montants historiques
-//     color: () => cryptoColors[crypto.id], // Utilise la couleur unique associée à chaque crypto
-//     strokeWidth: 2,
-//   })),
-// };
-
-// return (
-//   <View style={styles.container}>
-//     <Text style={styles.header}>Graphique des Cryptos</Text>
-
-//     {/* Liste des cryptos disponibles */}
-//     <ScrollView style={styles.cryptoList}>
-//       {cryptos.map((crypto) => (
-//         <TouchableOpacity
-//           key={crypto.id} // Ajout du "key" unique ici
-//           style={styles.cryptoItem}
-//           onPress={() => handleSelectCrypto(crypto.id)} // Sélectionner une crypto
-//         >
-//           <View
-//             style={[
-//               styles.checkbox,
-//               { borderColor: cryptoColors[crypto.id], backgroundColor: selectedCryptos.includes(crypto.id) ? cryptoColors[crypto.id] : 'transparent' },
-//             ]}
-//           />
-//           <Text style={styles.cryptoName}>{crypto.name}</Text> {/* Assurez-vous d'utiliser 'name' ou un autre champ valide */}
-//         </TouchableOpacity>
-//       ))}
-//     </ScrollView>
-
-//     {/* Affichage du graphique */}
-//     <View style={styles.graphContainer}>
-//       {filteredData.length > 0 ? (
-//         <>
-//           <LineChart
-//             data={chartData}
-//             width={Dimensions.get('window').width - 32}
-//             height={300}
-//             chartConfig={{
-//               backgroundColor: '#1c313a',
-//               backgroundGradientFrom: '#457b9d',
-//               backgroundGradientTo: '#1d3557',
-//               decimalPlaces: 2,
-//               color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-//               labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-//               style: { borderRadius: 8 },
-//               propsForDots: {
-//                 r: '6',
-//                 strokeWidth: '2',
-//                 stroke: '#ffa726',
-//               },
-//             }}
-//             bezier
-//             style={styles.chart}
-//           />
-//           {/* Légende des courbes */}
-//           <View style={styles.legendContainer}>
-//             {filteredData.map((crypto) => (
-//               <View key={crypto.id} style={styles.legendItem}>
-//                 <View style={[styles.legendColor, { backgroundColor: cryptoColors[crypto.id] }]} />
-//                 <Text style={styles.legendText}>{crypto.name}</Text> {/* Assurez-vous d'utiliser 'name' ou un autre champ valide */}
-//               </View>
-//             ))}
-//           </View>
-//         </>
-//       ) : (
-//         <Text style={styles.graphText}>
-//           Sélectionnez des cryptos pour afficher le graphique.
-//         </Text>
-//       )}
-//     </View>
-//   </View>
-// );
-
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     padding: 16,
-//     backgroundColor: '#f1f5f9',
-//   },
-//   header: {
-//     fontSize: 24,
-//     fontWeight: 'bold',
-//     textAlign: 'center',
-//     marginBottom: 20,
-//     color: '#1e3a8a',
-//   },
-//   cryptoList: {
-//     maxHeight: 150, // Limite la hauteur pour permettre le défilement
-//     marginBottom: 20,
-//     borderRadius: 8,
-//     backgroundColor: '#fff',
-//     padding: 10,
-//     shadowColor: '#000',
-//     shadowOffset: { width: 0, height: 2 },
-//     shadowOpacity: 0.1,
-//     shadowRadius: 4,
-//     elevation: 2,
-//   },
-//   cryptoItem: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     marginBottom: 10,
-//   },
-//   checkbox: {
-//     width: 20,
-//     height: 20,
-//     borderWidth: 2,
-//     borderRadius: 4,
-//     marginRight: 10,
-//   },
-//   cryptoName: {
-//     fontSize: 16,
-//   },
-//   graphContainer: {
-//     alignItems: 'center',
-//     marginBottom: 20,
-//   },
-//   graphText: {
-//     fontSize: 16,
-//     color: '#6c757d',
-//     textAlign: 'center',
-//   },
-//   chart: {
-//     borderRadius: 8,
-//   },
-//   legendContainer: {
-//     marginTop: 10,
-//     flexDirection: 'row',
-//     flexWrap: 'wrap',
-//     justifyContent: 'center',
-//   },
-//   legendItem: {
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     marginHorizontal: 10,
-//     marginBottom: 5,
-//   },
-//   legendColor: {
-//     width: 12,
-//     height: 12,
-//     borderRadius: 6,
-//     marginRight: 5,
-//   },
-//   legendText: {
-//     fontSize: 14,
-//     color: '#333',
-//   },
-// });
-
-// export default CryptoGrapheScreen;
