@@ -1,15 +1,29 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext'; // Import du contexte de thème
 import Footer from '../components/Footer';
+import { getUserTransactions } from '../services/transactionService'; // Service importé
 
 export default function TransactionHistoryScreen() {
   const { darkMode } = useTheme(); // Récupère le mode actuel
-  const [transactions, setTransactions] = useState([
-    { id: '1', crypto: 'Bitcoin', type: 'Achat', quantity: 0.1, amount: 5000, date: '2023-02-01' },
-    { id: '2', crypto: 'Ethereum', type: 'Vente', quantity: 0.5, amount: 1600, date: '2023-02-05' },
-    { id: '3', crypto: 'Binance Coin', type: 'Achat', quantity: 5, amount: 1500, date: '2023-02-10' },
-  ]);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        setLoading(true);
+        const data = await getUserTransactions();
+        setTransactions(data);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des transactions :', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
 
   const themeStyles = darkMode ? styles.darkTheme : styles.lightTheme; // Applique les styles selon le mode
 
@@ -27,19 +41,29 @@ export default function TransactionHistoryScreen() {
           <Text style={[styles.tableHeaderCell, themeStyles.tableHeaderCell]}>Montant</Text>
           <Text style={[styles.tableHeaderCell, themeStyles.tableHeaderCell]}>Date</Text>
         </View>
-        <FlatList
-          data={transactions}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={[styles.tableRow, themeStyles.tableRow]}>
-              <Text style={[styles.tableCell, themeStyles.tableCell]}>{item.crypto}</Text>
-              <Text style={[styles.tableCell, themeStyles.tableCell]}>{item.type}</Text>
-              <Text style={[styles.tableCell, themeStyles.tableCell]}>{item.quantity}</Text>
-              <Text style={[styles.tableCell, themeStyles.tableCell]}>${item.amount.toLocaleString()}</Text>
-              <Text style={[styles.tableCell, themeStyles.tableCell]}>{item.date}</Text>
-            </View>
-          )}
-        />
+        {loading ? (
+          <ActivityIndicator size="large" color="#4B9CD3" style={{ marginTop: 20 }} />
+        ) : (
+          <FlatList
+            data={transactions}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <View style={[styles.tableRow, themeStyles.tableRow]}>
+                <Text style={[styles.tableCell, themeStyles.tableCell]}>{item.crypto}</Text>
+                <Text style={[styles.tableCell, themeStyles.tableCell]}>{item.type}</Text>
+                <Text style={[styles.tableCell, themeStyles.tableCell]}>{item.quantity}</Text>
+                <Text style={[styles.tableCell, themeStyles.tableCell]}>
+                  ${parseFloat(item.amount).toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </Text>
+
+                <Text style={[styles.tableCell, themeStyles.tableCell]}>{item.date}</Text>
+              </View>
+            )}
+          />
+        )}
       </View>
 
       {/* Footer */}
@@ -47,6 +71,8 @@ export default function TransactionHistoryScreen() {
     </View>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   container: {
