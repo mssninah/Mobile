@@ -1,4 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db } from '../config/firebase-config';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
@@ -6,7 +7,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 export const pickImageAndUpload = async () => {
   try {
     console.log("📷 Lancement de la caméra...");
-    
+
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       aspect: [1, 1],
@@ -25,7 +26,7 @@ export const pickImageAndUpload = async () => {
 
     // Upload dans Cloudinary
     console.log("☁️ Envoi de l'image à Cloudinary...");
-    
+
     const formData = new FormData();
     formData.append('file', {
       uri,
@@ -39,37 +40,38 @@ export const pickImageAndUpload = async () => {
       body: formData,
     });
 
-    console.log("☁️ Réponse de Cloudinary:", response);
-
     if (!response.ok) {
       throw new Error("❌ Erreur lors de l'upload de l'image sur Cloudinary.");
     }
 
     const data = await response.json();
-    console.log("☁️ Cloudinary Data:", data);
-
     const imageUrl = data.secure_url;
+
     console.log("✅ Image URL reçue:", imageUrl);
 
-    // Sauvegarde l'URL sur Firestore avec l'email de l'utilisateur
-    console.log("🔍 Récupération des infos utilisateur...");
-    
-    const user = auth.currentUser;
-    if (!user) throw new Error("❌ Utilisateur non authentifié.");
+    // Récupération des informations de session
+    const sessionData = await AsyncStorage.getItem('auth_connected');
+    if (!sessionData) {
+      throw new Error("❌ Aucune session utilisateur trouvée.");
+    }
 
-    const userEmail = user.email;
-    console.log("📧 Email utilisateur:", userEmail);
+    const { idUser } = JSON.parse(sessionData);
 
-    const userDocRef = doc(db, 'users', userEmail);
-    console.log("📂 Référence du document Firestore:", userDocRef.path);
+    if (!idUser) {
+      throw new Error("❌ ID utilisateur introuvable dans la session.");
+    }
 
-    await setDoc(userDocRef, { profileImage: imageUrl }, { merge: true });
+    console.log("🔍 ID utilisateur récupéré :", idUser);
+
+    // Mise à jour du champ `img` dans Firestore
+    const userDocRef = doc(db, 'Utilisateurs', idUser);
+    await setDoc(userDocRef, { img: imageUrl }, { merge: true });
 
     console.log("✅ URL de l'image sauvegardée dans Firestore.");
 
     return imageUrl;
   } catch (error) {
-    console.error("❌ Erreur lors de l'upload de l'image:", error);
+    console.error("❌ Erreur lors de l'upload de l'image :", error);
     return null;
   }
 };
@@ -79,23 +81,34 @@ export const getProfilePictureUrl = async () => {
   try {
     console.log("🔍 Récupération de la photo de profil...");
 
-    const user = auth.currentUser;
-    if (!user) throw new Error("❌ Utilisateur non authentifié.");
+    // Récupération des informations de session
+    const sessionData = await AsyncStorage.getItem('auth_connected');
+    if (!sessionData) {
+      throw new Error("❌ Aucune session utilisateur trouvée.");
+    }
 
-    const userEmail = user.email;
-    console.log("📧 Email utilisateur:", userEmail);
+    const { idUser } = JSON.parse(sessionData);
 
-    const userDocRef = doc(db, 'users', userEmail);
-    console.log("📂 Référence du document Firestore:", userDocRef.path);
+    if (!idUser) {
+      throw new Error("❌ ID utilisateur introuvable dans la session.");
+    }
 
+    console.log("🔍 ID utilisateur récupéré :", idUser);
+
+    const userDocRef = doc(db, 'Utilisateurs', idUser);
     const userDoc = await getDoc(userDocRef);
-    console.log("📄 Données du document Firestore:", userDoc.exists() ? userDoc.data() : "Document non trouvé.");
 
-    if (!userDoc.exists()) return null;
+    if (!userDoc.exists()) {
+      console.log("❌ Document utilisateur introuvable dans Firestore.");
+      return null;
+    }
 
-    return userDoc.data().profileImage || null;
+    const userData = userDoc.data();
+    console.log("📄 Données utilisateur récupérées :", userData);
+
+    return userData.img || null;
   } catch (error) {
-    console.error("❌ Erreur lors de la récupération de la photo de profil:", error);
+    console.error("❌ Erreur lors de la récupération de la photo de profil :", error);
     return null;
   }
 };
